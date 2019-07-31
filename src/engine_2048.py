@@ -2,7 +2,7 @@ import numpy as np
 
 class chessBoard():
 
-	def __init__(self,board=[]):
+	def __init__(self,board=[],VERBOSE=True):
 
 		self.board = board if board !=[] else np.zeros(16)
 		self.update_gameboard()
@@ -10,10 +10,10 @@ class chessBoard():
 			old_board = self.board.copy()
 			self.user_input()
 			if (self.board == old_board).all():
-				print("No merge happened")
+				print("No merge happened") if VERBOSE
 				continue
 			if self.update_gameboard():
-				print("You Lost, total score = %s"%np.sum(self.board))
+				print("You Lost, total score = %s"%np.sum(self.board)) if VERBOSE
 				break
 
 	def user_input(self):
@@ -28,10 +28,10 @@ class chessBoard():
 		elif val == "D" or val == "d":
 			self.move_right()
 		elif val == "Q" or val == "q":
-			print("Quit Game")
+			print("Quit Game") if VERBOSE
 			sys.exit()
 		else:
-			print("Unknown input, Q to quit")
+			print("Unknown input, Q to quit") if VERBOSE
 			return self.user_input()
 
 	def update_gameboard(self):
@@ -45,8 +45,8 @@ class chessBoard():
 			zero_location = np.random.choice(np.where(self.board == 0)[0])
 			self.board[zero_location] = np.random.choice([2,4])
 
-		print("*"*20)
-		print(np.array(self.board,dtype="int").reshape(4,4))
+		print("*"*20) if VERBOSE
+		print(np.array(self.board,dtype="int").reshape(4,4)) if VERBOSE
 
 		for row in self.board.reshape(4,4):
 			for i in range(4-1):

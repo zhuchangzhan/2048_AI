@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 
 class chessBoard():
@@ -8,19 +7,18 @@ class chessBoard():
 		self.board = board if board !=[] else np.zeros(16)
 		self.update_gameboard()
 		while True:
-			self.score = np.sum(self.board)
-			old_board = self.board
+			old_board = self.board.copy()
 			self.user_input()
 			if (self.board == old_board).all():
 				print("No merge happened")
 				continue
-			else:
-				self.update_gameboard()
-				self.check_game_status()
+			if self.update_gameboard():
+				print("You Lost, total score = %s"%np.sum(self.board))
+				break
 
 	def user_input(self):
 
-		val = input("WASD?: ")
+		val = raw_input("WASD?: ")
 		if val == "W" or val == "w":
 			self.move_up()
 		elif val == "A" or val == "a":
@@ -38,75 +36,58 @@ class chessBoard():
 
 	def update_gameboard(self):
 
-		cur_board = list(self.board[self.board == 0])
-		if len(cur_board) > 1:
+		if len(self.board[self.board == 0]) > 1:
 			iteration = np.random.choice([1,1,2])
 			for _ in range(iteration):
 				zero_location = np.random.choice(np.where(self.board == 0)[0])
 				self.board[zero_location] = np.random.choice([2,4])
-		elif len(cur_board) == 1:
+		elif len(self.board[self.board == 0]) == 1:
 			zero_location = np.random.choice(np.where(self.board == 0)[0])
 			self.board[zero_location] = np.random.choice([2,4])
 
 		print("*"*20)
 		print(np.array(self.board,dtype="int").reshape(4,4))
 
-	def check_game_status(self):
+		for row in self.board.reshape(4,4):
+			for i in range(4-1):
+				if row[i] == row[i+1]:
+					return False
+		for row in self.board.reshape(4,4).T:
+			for i in range(4-1):
+				if row[i] == row[i+1]:
+					return False
+		return True
 
-		if len(list(self.board[self.board == 0])) == 0:
-			for row in self.board.reshape(4,4):
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return
-			for row in self.board.reshape(4,4).T:
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return
-			if lose:
-				print("You Lost, total score = %s"%self.score)
-				sys.exit()
+	def merge_row(self,row,direction="left"):
 
-	def merge(self,length,x,direction="left"):
-
-		new_list = np.zeros(4)
-		nonzero_x = np.array(x)[np.nonzero(x)[0]]
-		
+		nonzero_item   = row[np.nonzero(row)[0]]
 		if direction == "right":
-			nonzero_x = nonzero_x[::-1]
+			nonzero_item = nonzero_item[::-1]
 
-		done = True
-		for i in range(len(nonzero_x)):
-			try:
-				if nonzero_x[i] == nonzero_x[i+1] and done:
-					done = False
-					new_list[i] = nonzero_x[i]*2
-					nonzero_x[i+1] = 0
-				else:
-					new_list[i] = nonzero_x[i]
-			except:
-				new_list[i] = nonzero_x[i]
-				
-		nonzero = len(np.nonzero(new_list)[0])
+		new_row = np.zeros(4)
+		for i in range(len(nonzero_item)):
+			new_row[i] = nonzero_item[i]
+			if i>=len(nonzero_item)-1:
+				break
+			if nonzero_item[i] == nonzero_item[i+1] and nonzero_item[i] != 0:
+				new_row[i] = nonzero_item[i]*2
+				nonzero_item[i+1] = 0
 
 		if direction == "right":
-			new_list = new_list[::-1]
-		if length == nonzero:
-			return new_list
+			new_row = new_row[::-1]
+		if len(np.nonzero(row)[0]) == len(np.nonzero(new_row)[0]):
+			return new_row
 		else:
-			return self.merge(nonzero, new_list, direction)
+			return self.merge(new_row,direction)
 
 	def move_left(self):
-		new_board = np.zeros(16)
-		for j,row in enumerate(self.board.reshape(4,4)):
-			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row,"left")
-		self.board = new_board
+		for i,row in enumerate(self.board.reshape(4,4)):
+			self.board[i*4:(i+1)*4] = self.merge_row(row,"left")
 
 	def move_right(self):
-		new_board = np.zeros(16)
-		for j,row in enumerate(self.board.reshape(4,4)):
-			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row,"right")
-		self.board = new_board
-
+		for i,row in enumerate(self.board.reshape(4,4)):
+			self.board[i*4:(i+1)*4] = self.merge_row(row,"right")
+		
 	def move_up(self):
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 		self.move_left()
@@ -116,42 +97,6 @@ class chessBoard():
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 		self.move_right()
 		self.board = self.board.reshape(4,4).T.reshape(-1)
-
-if __name__ == "__main__":
-	# Test up merge
-	board = np.array([[512.,8.,2.,0.],
-					 [256.,32.,2.,0.],
-					 [128.,32.,2.,0.],
-					 [ 32.,4.,0.,0.]]).reshape(-1)
-	# Test left/right merge
-	board = np.array([[512.,8.,2.,0.],
-					 [256.,32.,2.,0.],
-					 [8.,8.,8.,0.],
-					 [ 32.,4.,0.,0.]]).reshape(-1)
-	# Test game board full
-	board = np.array([[512.,32.,8.,4.],
-					 [256.,64.,2.,2.],
-					 [128.,16.,4.,4.],
-					 [ 32.,8.,4.,8.]]).reshape(-1)
-	# Test no left or up movement allowed
-	board = np.array([[1024.,16.,8.,4.],
-					 [ 256.,64.,4.,2.],
-					 [  64.,8.,2.,0.],
-					 [   0.,0.,0.,0.]]).reshape(-1)
-	# Test Win
-	board = np.array([[1024.,0.,0.,0.],
-					 [ 512.,4.,0.,4.],
-					 [  256.,2.,8.,0.],
-					 [   256.,16.,4.,2.]]).reshape(-1)
-	# Test lose
-	board = np.array([[4,16,2048,0],
-					  [2,8,128,8],
-					  [8,2,8,2],
-					  [2,8,16,4]]).reshape(-1)
-
-	chessBoard(board)
-
-
 
 
 

@@ -32,9 +32,13 @@ import numpy as np
 
 class chessBoard():
 
-	def __init__(self):
+	def __init__(self,board=[]):
 		self.score = 0
-		self.board = np.zeros(16)
+		if board == []:
+			self.board = np.zeros(16)
+		else:
+			self.board = board
+
 		while True:
 			state = self.game_start()
 			if state == False:
@@ -133,7 +137,11 @@ class chessBoard():
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 
 if __name__ == "__main__":
-	gameboard = chessBoard()
+	board = np.array([[512.,8.,2.,0.],
+					 [256.,32.,2.,0.],
+					 [128.,32.,2.,0.],
+					 [ 32.,4.,0.,0.]]).reshape(-1)
+	gameboard = chessBoard(board)
 
 
 

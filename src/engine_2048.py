@@ -1,64 +1,71 @@
 import numpy as np
+import sys
 from ai_2048 import AI_2048
 
 class chessBoard():
 
 	def __init__(self,board=[],player="Human",mode=None):
 
+		self.previous_move = True # parameter for AI to know if merged happened or not
+		self.AI = AI_2048(mode)
 		self.board = board if board !=[] else np.zeros(16)
 		self.update_gameboard()
-		self.AI = AI_2048(mode)
 		while True:
 			old_board = self.board.copy()
-			self.user_input(player,mode) 
-			if (self.board == old_board).all():
-				print("No merge happened")
+			output = self.user_input(player) 
+			if (self.board == old_board).all() and output == None:
+				print("No merge happened",self.val)
+				self.previous_move = False
 				continue
+			self.previous_move = True
 			if self.update_gameboard():
 				print("You Lost, total score = %s"%np.sum(self.board))
 				break
 
-	def user_input(self,player,mode):
+	def user_input(self,player):
 
-		val = input("WASD?: ") if player == "Human" else self.AI.decision()
-		if val == "W" or val == "w":
+		self.val = input("WASD?: ") if player == "Human" else self.AI.decision(self.previous_move)
+		if self.val == "W" or self.val == "w":
 			self.move_up()
-		elif val == "A" or val == "a":
+		elif self.val == "A" or self.val == "a":
 			self.move_left()
-		elif val == "S" or val == "s":
+		elif self.val == "S" or self.val == "s":
 			self.move_down()
-		elif val == "D" or val == "d":
+		elif self.val == "D" or self.val == "d":
 			self.move_right()
-		elif val == "Q" or val == "q":
+		elif self.val == "Q" or self.val == "q":
 			print("Quit Game")
 			sys.exit()
+		elif self.val == "C" or self.val == "c":
+			return "C"
 		else:
 			print("Unknown input, Q to quit")
-			return self.user_input()
+			return self.user_input(player) if player == "Human" else sys.exit() 
 
 	def update_gameboard(self):
 
-		if len(self.board[self.board == 0]) > 1:
-			iteration = np.random.choice([1,1,2])
+		count_zero = len(self.board[self.board == 0])
+		print(count_zero)
+		if count_zero > 0:
+			iteration = count_zero if count_zero == 1 else np.random.choice([1,1,2])
 			for _ in range(iteration):
 				zero_location = np.random.choice(np.where(self.board == 0)[0])
 				self.board[zero_location] = np.random.choice([2,4])
-		elif len(self.board[self.board == 0]) == 1:
-			zero_location = np.random.choice(np.where(self.board == 0)[0])
-			self.board[zero_location] = np.random.choice([2,4])
-
-		print("*"*20)
-		print(np.array(self.board,dtype="int").reshape(4,4))
-
-		for row in self.board.reshape(4,4):
-			for i in range(4-1):
-				if row[i] == row[i+1]:
-					return False
-		for row in self.board.reshape(4,4).T:
-			for i in range(4-1):
-				if row[i] == row[i+1]:
-					return False
-		return True
+			print("*"*20)
+			print(np.array(self.board,dtype="int").reshape(4,4))
+			return False
+		else:
+			print("*"*40)
+			print(np.array(self.board,dtype="int").reshape(4,4))
+			for row in self.board.reshape(4,4):
+				for i in range(4-1):
+					if row[i] == row[i+1]:
+						return False
+			for row in self.board.reshape(4,4).T:
+				for i in range(4-1):
+					if row[i] == row[i+1]:
+						return False
+			return True
 
 	def merge_row(self,row,direction="left"):
 

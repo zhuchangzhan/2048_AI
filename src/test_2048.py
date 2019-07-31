@@ -1,55 +1,51 @@
-"""
-
-"""
-
 import sys
 import numpy as np
 
 class chessBoard():
 
-	def __init__(self,board=[]):
+	def __init__(self,board=[],test=False):
+
+		self.test = test
 		self.score = 0
-		if board == []:
-			self.board = np.zeros(16)
-		else:
-			self.board = board
+		self.board = board if board !=[] else np.zeros(16)
 
 		while True:
-			state = self.game_loop()
+
+
+
+			self.score = np.sum(self.board)
+			old_board = self.board
+
+			cur_board = list(self.board[self.board == 0])
+
+
+			if self.test:
+				self.test = False
+			else:
+				if len(cur_board) > 1:
+					iteration = np.random.choice([1,1,2])
+					for _ in range(iteration):
+						zero_location = np.random.choice(np.where(self.board == 0)[0])
+						self.board[zero_location] = np.random.choice([2,4])
+				elif len(cur_board) == 1:
+					zero_location = np.random.choice(np.where(self.board == 0)[0])
+					self.board[zero_location] = np.random.choice([2,4])
+
 			print("*"*20)
-			print(self.board.reshape(4,4))
-			if state == False:
-				print("You Lost, total score = %s"%self.score)
-				break
-			while True:
+			print(np.array(self.board,dtype="int").reshape(4,4))
+			
 				if self.user_input():
-					#print(self.board.reshape(4,4))
+					if (self.board == old_board).all():
+						if len(list(self.board[self.board == 0])) == 0:
+							print("You Lost, total score = %s"%self.score)
+							sys.exit()
+						else:
+							print("No merge happened")
+							continue
 					break
 
-	def game_loop(self):
 
-		#print("*"*20)
-		#print(self.board.reshape(4,4))
-		self.score = np.sum(self.board)
-
-		if list(self.board[self.board == 0]) != []:
-			iteration = np.random.choice([1,1,2])
-			for _ in range(iteration):
-				zero_location = np.where(self.board == 0)[0]
-				location = np.random.choice(zero_location)
-				value = np.random.choice([2,4])
-				self.board[location] = value
-		else:
-			for row in self.board.reshape(4,4):
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return True
-			for row in self.board.reshape(4,4).T:
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return True
-			return False
-		return True
+			
 
 	def user_input(self):
 
@@ -121,38 +117,6 @@ class chessBoard():
 		self.move_right()
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 
-
-
-def merge(length,x,direction="left"):
-
-	new_list = np.zeros(4)
-	nonzero_x = np.array(x)[np.nonzero(x)[0]]
-	done = True
-
-	if direction == "right":
-		nonzero_x = nonzero_x[::-1]
-
-	for i in range(len(nonzero_x)):
-		try:
-			if nonzero_x[i] == nonzero_x[i+1] and done:
-				done = False
-				new_list[i] = nonzero_x[i]*2
-				nonzero_x[i+1] = 0
-			else:
-				new_list[i] = nonzero_x[i]
-		except:
-			new_list[i] = nonzero_x[i]
-			
-	nonzero = len(np.nonzero(new_list)[0])
-
-	if direction == "right":
-		new_list = new_list[::-1]
-
-	if length == nonzero:
-		return new_list
-	else:
-		return merge(nonzero, new_list, direction)
-
 if __name__ == "__main__":
 	board = np.array([[512.,8.,2.,0.],
 					 [256.,32.,2.,0.],
@@ -164,19 +128,22 @@ if __name__ == "__main__":
 					 [8.,8.,8.,0.],
 					 [ 32.,4.,0.,0.]]).reshape(-1)
 
-	board = np.array([[512.,32.,2.,0.]
-					 [256.,64.,4.,2.]
-					 [128.,16.,2.,4.]
+	board = np.array([[512.,32.,8.,4.],
+					 [256.,64.,2.,2.],
+					 [128.,16.,4.,4.],
 					 [ 32.,8.,4.,8.]]).reshape(-1)
 
-	chessBoard(board)
-	"""
-	print(merge(3,[0,512,8,4],direction="left"))
-	print(merge(3,[0,512,8,4],direction="right"))
-	print(merge(3,[8.,8.,8.,0.],direction="left"))
-	print(merge(3,[8.,8.,8.,0.],direction="right"))
-	"""
+	board = np.array([[1024.,16.,8.,4.],
+					 [ 256.,64.,4.,2.],
+					 [  64.,8.,2.,0.],
+					 [   0.,0.,0.,0.]]).reshape(-1)
 
+	board = np.array([[1024.,0.,0.,0.],
+					 [ 512.,4.,0.,4.],
+					 [  256.,2.,8.,0.],
+					 [   256.,16.,4.,2.]]).reshape(-1)
+
+	chessBoard(board,test=True)
 
 
 

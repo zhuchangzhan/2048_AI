@@ -1,30 +1,5 @@
 """
 
-priority for moving down is wrong
-[[512.   8.   2.   0.]
- [256.  32.   2.   0.]
- [128.  32.   2.   0.]
- [ 32.   4.   0.   0.]]
-WASD?: s
-********************
-[[512.   0.   0.   0.]
- [256.   8.   2.   0.]
- [128.  64.   4.   0.]
- [ 32.   4.   2.   0.]]
-
- [[1024.   16.    2.    4.]
- [ 128.   16.    4.    2.]
- [  32.   16.    0.    0.]
- [  16.    2.    4.    2.]]
-WASD?: s
-********************
-[[1024.    2.    2.    0.]
- [ 128.   32.    0.    0.]
- [  32.   16.    2.    0.]
- [  16.    2.    8.    8.]]
-
- need to create test cases that loads gamestate
-
 """
 
 import sys
@@ -40,18 +15,21 @@ class chessBoard():
 			self.board = board
 
 		while True:
-			state = self.game_start()
+			state = self.game_loop()
+			print("*"*20)
+			print(self.board.reshape(4,4))
 			if state == False:
 				print("You Lost, total score = %s"%self.score)
 				break
 			while True:
 				if self.user_input():
+					#print(self.board.reshape(4,4))
 					break
 
-	def game_start(self):
+	def game_loop(self):
 
-		print("*"*20)
-		print(self.board.reshape(4,4))
+		#print("*"*20)
+		#print(self.board.reshape(4,4))
 		self.score = np.sum(self.board)
 
 		if list(self.board[self.board == 0]) != []:
@@ -91,10 +69,15 @@ class chessBoard():
 			return False
 		return True
 
-	def merge(self,length=4, x=[8,4,2,2]):
+	def merge(self,length,x,direction="left"):
 
 		new_list = np.zeros(4)
 		nonzero_x = np.array(x)[np.nonzero(x)[0]]
+		
+
+		if direction == "right":
+			nonzero_x = nonzero_x[::-1]
+
 		done = True
 		for i in range(len(nonzero_x)):
 			try:
@@ -106,27 +89,29 @@ class chessBoard():
 					new_list[i] = nonzero_x[i]
 			except:
 				new_list[i] = nonzero_x[i]
+				
 		nonzero = len(np.nonzero(new_list)[0])
+
+		if direction == "right":
+			new_list = new_list[::-1]
 		if length == nonzero:
 			return new_list
 		else:
-			return self.merge(nonzero, new_list)
+			return self.merge(nonzero, new_list, direction)
 
 	def move_left(self):
 		new_board = np.zeros(16)
 		for j,row in enumerate(self.board.reshape(4,4)):
-			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row)
+			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row,"left")
 		self.board = new_board
 
 	def move_right(self):
-		self.move_left()
 		new_board = np.zeros(16)
 		for j,row in enumerate(self.board.reshape(4,4)):
-			new_board[j*4:(j+1)*4] = np.concatenate([np.zeros(4-len(row[row!=0])),row[row!=0]])
+			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row,"right")
 		self.board = new_board
 
 	def move_up(self):
-		
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 		self.move_left()
 		self.board = self.board.reshape(4,4).T.reshape(-1)
@@ -136,13 +121,61 @@ class chessBoard():
 		self.move_right()
 		self.board = self.board.reshape(4,4).T.reshape(-1)
 
+
+
+def merge(length,x,direction="left"):
+
+	new_list = np.zeros(4)
+	nonzero_x = np.array(x)[np.nonzero(x)[0]]
+	done = True
+
+	if direction == "right":
+		nonzero_x = nonzero_x[::-1]
+
+	for i in range(len(nonzero_x)):
+		try:
+			if nonzero_x[i] == nonzero_x[i+1] and done:
+				done = False
+				new_list[i] = nonzero_x[i]*2
+				nonzero_x[i+1] = 0
+			else:
+				new_list[i] = nonzero_x[i]
+		except:
+			new_list[i] = nonzero_x[i]
+			
+	nonzero = len(np.nonzero(new_list)[0])
+
+	if direction == "right":
+		new_list = new_list[::-1]
+
+	if length == nonzero:
+		return new_list
+	else:
+		return merge(nonzero, new_list, direction)
+
 if __name__ == "__main__":
 	board = np.array([[512.,8.,2.,0.],
 					 [256.,32.,2.,0.],
 					 [128.,32.,2.,0.],
 					 [ 32.,4.,0.,0.]]).reshape(-1)
-	gameboard = chessBoard(board)
 
+	board = np.array([[512.,8.,2.,0.],
+					 [256.,32.,2.,0.],
+					 [8.,8.,8.,0.],
+					 [ 32.,4.,0.,0.]]).reshape(-1)
+
+	board = np.array([[512.,32.,2.,0.]
+					 [256.,64.,4.,2.]
+					 [128.,16.,2.,4.]
+					 [ 32.,8.,4.,8.]]).reshape(-1)
+
+	chessBoard(board)
+	"""
+	print(merge(3,[0,512,8,4],direction="left"))
+	print(merge(3,[0,512,8,4],direction="right"))
+	print(merge(3,[8.,8.,8.,0.],direction="left"))
+	print(merge(3,[8.,8.,8.,0.],direction="right"))
+	"""
 
 
 

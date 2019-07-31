@@ -3,25 +3,21 @@ import numpy as np
 
 class chessBoard():
 
-	def __init__(self,board=[],test=False):
+	def __init__(self,board=[]):
 
-		self.test = test
-		self.score = 0
 		self.board = board if board !=[] else np.zeros(16)
 
+		print("*"*20,"\n",np.array(self.board,dtype="int").reshape(4,4))
+
 		while True:
-
-
-
 			self.score = np.sum(self.board)
 			old_board = self.board
-
-			cur_board = list(self.board[self.board == 0])
-
-
-			if self.test:
-				self.test = False
+			self.user_input()
+			if (self.board == old_board).all():
+				print("No merge happened")
+				continue
 			else:
+				cur_board = list(self.board[self.board == 0])
 				if len(cur_board) > 1:
 					iteration = np.random.choice([1,1,2])
 					for _ in range(iteration):
@@ -31,22 +27,22 @@ class chessBoard():
 					zero_location = np.random.choice(np.where(self.board == 0)[0])
 					self.board[zero_location] = np.random.choice([2,4])
 
-			print("*"*20)
-			print(np.array(self.board,dtype="int").reshape(4,4))
-			
-				if self.user_input():
-					if (self.board == old_board).all():
-						if len(list(self.board[self.board == 0])) == 0:
-							print("You Lost, total score = %s"%self.score)
-							sys.exit()
-						else:
-							print("No merge happened")
-							continue
-					break
+				print("*"*20,"\n",np.array(self.board,dtype="int").reshape(4,4))
 
-
-			
-
+				if len(list(self.board[self.board == 0])) == 0:
+					lose = True
+					for row in self.board.reshape(4,4):
+						for i in range(4-1):
+							if row[i] == row[i+1]:
+								lose = False
+					for row in self.board.reshape(4,4).T:
+						for i in range(4-1):
+							if row[i] == row[i+1]:
+								lose = False
+					if lose:
+						print("You Lost, total score = %s"%self.score)
+						sys.exit()
+				
 	def user_input(self):
 
 		val = input("WASD?: ")
@@ -59,11 +55,11 @@ class chessBoard():
 		elif val == "D" or val == "d":
 			self.move_right()
 		elif val == "Q" or val == "q":
+			print("Quit Game")
 			sys.exit()
 		else:
-			print("unknown input, Q to quit")
-			return False
-		return True
+			print("Unknown input, Q to quit")
+			return user_input()
 
 	def merge(self,length,x,direction="left"):
 
@@ -142,8 +138,12 @@ if __name__ == "__main__":
 					 [ 512.,4.,0.,4.],
 					 [  256.,2.,8.,0.],
 					 [   256.,16.,4.,2.]]).reshape(-1)
+	board = np.array([[4,16,2048,0],
+					  [2,8,128,8],
+					  [8,2,8,2],
+					  [2,8,16,4]]).reshape(-1)
 
-	chessBoard(board,test=True)
+	chessBoard(board)
 
 
 

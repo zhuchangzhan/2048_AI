@@ -1,3 +1,32 @@
+"""
+
+priority for moving down is wrong
+[[512.   8.   2.   0.]
+ [256.  32.   2.   0.]
+ [128.  32.   2.   0.]
+ [ 32.   4.   0.   0.]]
+WASD?: s
+********************
+[[512.   0.   0.   0.]
+ [256.   8.   2.   0.]
+ [128.  64.   4.   0.]
+ [ 32.   4.   2.   0.]]
+
+ [[1024.   16.    2.    4.]
+ [ 128.   16.    4.    2.]
+ [  32.   16.    0.    0.]
+ [  16.    2.    4.    2.]]
+WASD?: s
+********************
+[[1024.    2.    2.    0.]
+ [ 128.   32.    0.    0.]
+ [  32.   16.    2.    0.]
+ [  16.    2.    8.    8.]]
+
+ need to create test cases that loads gamestate
+
+"""
+
 import sys
 import numpy as np
 
@@ -17,17 +46,18 @@ class chessBoard():
 
 	def game_start(self):
 
-		iteration = np.random.choice([1,1,2])
-		for _ in range(iteration):
-			zero_location = np.where(self.board == 0)[0]
-			location = np.random.choice(zero_location)
-			value = np.random.choice([2,4])
-			self.board[location] = value
-
 		print("*"*20)
 		print(self.board.reshape(4,4))
 		self.score = np.sum(self.board)
-		if list(self.board[self.board == 0]) == []:
+
+		if list(self.board[self.board == 0]) != []:
+			iteration = np.random.choice([1,1,2])
+			for _ in range(iteration):
+				zero_location = np.where(self.board == 0)[0]
+				location = np.random.choice(zero_location)
+				value = np.random.choice([2,4])
+				self.board[location] = value
+		else:
 			for row in self.board.reshape(4,4):
 				for i in range(4-1):
 					if row[i] == row[i+1]:
@@ -79,25 +109,16 @@ class chessBoard():
 			return self.merge(nonzero, new_list)
 
 	def move_left(self):
-		board = self.board.reshape(4,4)
 		new_board = np.zeros(16)
-		print(self.board)
-		for j,row in enumerate(board):
-			new_row = self.merge(len(np.nonzero(row)[0]),row)
-			new_board[j*4:(j+1)*4] = new_row
-		print(new_board)
-		#sys.exit()
+		for j,row in enumerate(self.board.reshape(4,4)):
+			new_board[j*4:(j+1)*4] = self.merge(len(np.nonzero(row)[0]),row)
 		self.board = new_board
 
 	def move_right(self):
 		self.move_left()
-		board = self.board.reshape(4,4)
 		new_board = np.zeros(16)
-		for j,row in enumerate(board):
-			nonzero_location = row[row!=0]
-			rowlen = len(nonzero_location)
-			new_row = np.concatenate([np.zeros(4-rowlen),nonzero_location])
-			new_board[j*4:(j+1)*4] = new_row
+		for j,row in enumerate(self.board.reshape(4,4)):
+			new_board[j*4:(j+1)*4] = np.concatenate([np.zeros(4-len(row[row!=0])),row[row!=0]])
 		self.board = new_board
 
 	def move_up(self):

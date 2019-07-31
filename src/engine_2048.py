@@ -1,14 +1,16 @@
 import numpy as np
+from ai_2048 import AI_2048
 
 class chessBoard():
 
-	def __init__(self,board=[]):
+	def __init__(self,board=[],player="Human",mode=None):
 
 		self.board = board if board !=[] else np.zeros(16)
 		self.update_gameboard()
+		self.AI = AI_2048(mode)
 		while True:
 			old_board = self.board.copy()
-			self.user_input()
+			self.user_input(player,mode) 
 			if (self.board == old_board).all():
 				print("No merge happened")
 				continue
@@ -16,9 +18,9 @@ class chessBoard():
 				print("You Lost, total score = %s"%np.sum(self.board))
 				break
 
-	def user_input(self):
+	def user_input(self,player,mode):
 
-		val = raw_input("WASD?: ")
+		val = input("WASD?: ") if player == "Human" else self.AI.decision()
 		if val == "W" or val == "w":
 			self.move_up()
 		elif val == "A" or val == "a":

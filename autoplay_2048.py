@@ -7,24 +7,27 @@ from src.ai_2048 import responsive_2048_AI
 def play_2048(init_board = []):
 
 	board = init_board if init_board !=[] else np.zeros(16)
-	old_board = board
+	#old_board = board.copy()
 
-	AI = responsive_2048_AI(mode="random")
+	AI = responsive_2048_AI(mode="simple_max")
 	chessboard = chessBoard()
 
-	for i in range(100):
+	for i in range(1000):
 
 		board,over = chessboard.place_random(board)
 
-		print("*"*40)
+		
 		print(np.array(board,dtype="int").reshape(4,4))
+		print("*"*40)
 
 		if over:
 			print("Game over")
 			break
 
 		decision = AI.decision(board,chessboard)
-
+		if decision == "C":
+			print("Game over C")
+			break
 		board = chessboard.update_gameboard(board,decision)
 
 		

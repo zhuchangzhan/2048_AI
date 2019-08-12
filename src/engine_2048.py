@@ -1,20 +1,16 @@
 """
 
 rewrite the 100-line 2048 so that it's more ai friendly.
+I fell victim to my own preaching: premature optimization if root of all evil.
 
 """
-
-
-import numpy as np
 import sys
-from ai_2048 import AI_2048
+import numpy as np
 
 class chessBoard():
 
-	def __init__(self,board=[],player="Human",mode=None):
+	def __init__(self,board=[]):
 
-		self.previous_move = True # parameter for AI to know if merged happened or not
-		self.AI = AI_2048(mode)
 		self.board = board if board !=[] else np.zeros(16)
 		self.update_gameboard()
 		while True:

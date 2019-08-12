@@ -3,13 +3,11 @@ Code to automatically play 2048
 """
 import numpy as np
 
-class AI_2048():
+class simple_2048_AI():
 
 	def __init__(self,mode):
 		self.mode = mode
 		self.previous_key = ""
-
-
 	
 	def decision(self,moved):
 
@@ -33,9 +31,24 @@ class AI_2048():
 		 		elif self.previous_key == "D":
 		 			self.previous_key = "A"
 		 			return "C"
-		 elif self.mode == "intermediate":
 
-	def simple_maximum(self,moved):
+class responsive_2048_AI():
+
+	def __init__(self,mode=""):
+		self.mode = mode
+		self.previous_key = ""
+
+	def decision(self,board):
+
+
+
+
+
+
+
+
+
+
 
 
 		 	

@@ -33,8 +33,11 @@ class AI_2048():
 		 		elif self.previous_key == "D":
 		 			self.previous_key = "A"
 		 			return "C"
-		 		#else:
-		 		#	self.previous_key = "A"
-		 		#	return "A"
+		 elif self.mode == "intermediate":
+
+	def simple_maximum(self,moved):
+
+
+		 	
 
 

@@ -1,10 +1,3 @@
-"""
-
-rewrite the 100-line 2048 so that it's more ai friendly.
-
-"""
-
-
 import numpy as np
 import sys
 from ai_2048 import AI_2048

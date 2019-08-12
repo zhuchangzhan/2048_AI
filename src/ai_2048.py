@@ -34,11 +34,14 @@ class simple_2048_AI():
 
 class responsive_2048_AI():
 
-	def __init__(self,mode=""):
+	def __init__(self,mode):
 		self.mode = mode
 		self.previous_key = ""
 
-	def decision(self,board):
+	def decision(self,board,chessboard):
+
+		if self.mode == "random":
+	 		return np.random.choice(["W","A","S","D"])
 
 
 

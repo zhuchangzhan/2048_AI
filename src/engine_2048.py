@@ -9,66 +9,43 @@ import numpy as np
 
 class chessBoard():
 
-	def __init__(self,board=[]):
+	def __init__(self):
+		pass
+ 
+	def place_random(self,board):
 
-		self.board = board if board !=[] else np.zeros(16)
-		self.update_gameboard()
-		while True:
-			old_board = self.board.copy()
-			output = self.user_input(player) 
-			if (self.board == old_board).all() and output == None:
-				print("No merge happened",self.val)
-				self.previous_move = False
-				continue
-			self.previous_move = True
-			if self.update_gameboard():
-				print("You Lost, total score = %s"%np.sum(self.board))
-				break
-
-	def user_input(self,player):
-
-		self.val = input("WASD?: ") if player == "Human" else self.AI.decision(self.previous_move)
-		if self.val == "W" or self.val == "w":
-			self.move_up()
-		elif self.val == "A" or self.val == "a":
-			self.move_left()
-		elif self.val == "S" or self.val == "s":
-			self.move_down()
-		elif self.val == "D" or self.val == "d":
-			self.move_right()
-		elif self.val == "Q" or self.val == "q":
-			print("Quit Game")
-			sys.exit()
-		elif self.val == "C" or self.val == "c":
-			return "C"
-		else:
-			print("Unknown input, Q to quit")
-			return self.user_input(player) if player == "Human" else sys.exit() 
-
-	def update_gameboard(self):
-
-		count_zero = len(self.board[self.board == 0])
-		print(count_zero)
+		count_zero = len(board[board == 0])
 		if count_zero > 0:
 			iteration = count_zero if count_zero == 1 else np.random.choice([1,1,2])
 			for _ in range(iteration):
-				zero_location = np.random.choice(np.where(self.board == 0)[0])
-				self.board[zero_location] = np.random.choice([2,4])
-			print("*"*20)
-			print(np.array(self.board,dtype="int").reshape(4,4))
-			return False
+				zero_location = np.random.choice(np.where(board == 0)[0])
+				board[zero_location] = np.random.choice([2,4])
+			return board,False
+		else: # evaluate if the game is lost
+			for row in board.reshape(4,4):
+				for i in range(4-1):
+					if row[i] == row[i+1]:
+						return board,False
+			for row in board.reshape(4,4).T:
+				for i in range(4-1):
+					if row[i] == row[i+1]:
+						return board,False
+			return board,True
+
+	def update_gameboard(self,board,decision):
+
+		if decision == "W":
+			return self.move_up(board)
+		elif decision == "A":
+			return self.move_left(board)
+		elif decision == "S":
+			return self.move_down(board)
+		elif decision == "D":
+			return self.move_right(board)
 		else:
-			print("*"*40)
-			print(np.array(self.board,dtype="int").reshape(4,4))
-			for row in self.board.reshape(4,4):
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return False
-			for row in self.board.reshape(4,4).T:
-				for i in range(4-1):
-					if row[i] == row[i+1]:
-						return False
-			return True
+			print("Unknown input, Q to quit")
+			sys.exit() 
+
 
 	def merge_row(self,row,direction="left"):
 
@@ -92,24 +69,27 @@ class chessBoard():
 		else:
 			return self.merge_row(new_row,direction)
 
-	def move_left(self):
-		for i,row in enumerate(self.board.reshape(4,4)):
-			self.board[i*4:(i+1)*4] = self.merge_row(row,"left")
+	def move_left(self,board):
+		for i,row in enumerate(board.reshape(4,4)):
+			board[i*4:(i+1)*4] = self.merge_row(row,"left")
+		return board
 
-	def move_right(self):
-		for i,row in enumerate(self.board.reshape(4,4)):
-			self.board[i*4:(i+1)*4] = self.merge_row(row,"right")
-		
-	def move_up(self):
-		self.board = self.board.reshape(4,4).T.reshape(-1)
-		self.move_left()
-		self.board = self.board.reshape(4,4).T.reshape(-1)
+	def move_right(self,board):
+		for i,row in enumerate(board.reshape(4,4)):
+			board[i*4:(i+1)*4] = self.merge_row(row,"right")
+		return board
 
-	def move_down(self):
-		self.board = self.board.reshape(4,4).T.reshape(-1)
-		self.move_right()
-		self.board = self.board.reshape(4,4).T.reshape(-1)
+	def move_up(self,board):
+		board = board.reshape(4,4).T.reshape(-1)
+		board = self.move_left(board)
+		board = board.reshape(4,4).T.reshape(-1)
+		return board
 
+	def move_down(self,board):
+		board = board.reshape(4,4).T.reshape(-1)
+		board = self.move_right(board)
+		board = board.reshape(4,4).T.reshape(-1)
+		return board
 
 
 

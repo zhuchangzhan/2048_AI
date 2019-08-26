@@ -50,10 +50,7 @@ class responsive_2048_AI():
  			else:
  				return "A"
 
-
-
 	 	elif self.mode == "simple_max":
-
 	 		score = 0
 	 		nonzero = 100
 	 		decision = movable[0]
